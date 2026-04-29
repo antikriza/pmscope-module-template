@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pmscope-sdk from vendored wheel
+        run: pip install ./wheels/pmscope_sdk-0.1.0-py3-none-any.whl
+      - name: Install module (no deps — sdk already installed)
+        run: pip install --no-deps -e .
+      - name: Install test extras
+        run: pip install pytest~=7.4.4 pytest-asyncio~=0.23.3 httpx~=0.26.0
+      - name: Lint
+        run: |
+          pip install ruff
+          ruff check src/ tests/
+      - name: Unit + contract tests (against ASGI app, no Docker)
+        run: pytest tests/ -v

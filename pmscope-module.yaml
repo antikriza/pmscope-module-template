@@ -1,0 +1,16 @@
+# TODO(rename): replace every <PLACEHOLDER> below with your module's actual values.
+# The unmodified template fails ModuleManifest validation by design — this is
+# a guardrail to prevent accidental merges of un-customized templates.
+
+manifest_version: 1
+name: <MODULE_NAME>            # TODO: kebab-case slug, e.g. "pmscope-shodan"
+display_name: "<DISPLAY_NAME>" # TODO: human-readable label
+version: 0.0.1
+description: "<DESCRIPTION>"   # TODO: one-line summary
+build_context: ./              # local dev — replace with `docker_image: ghcr.io/...@sha256:...` for production
+sdk_version: ">=0.1,<0.2"
+entity_types: [<ENTITY_TYPE>]  # TODO: e.g. [domain, ip] — match what your runner accepts
+watchlist_severity: medium     # TODO: low / medium / high / critical
+chat_command: /<COMMAND>       # TODO: e.g. /shodan
+chat_usage: "/<COMMAND> <target>"
+chat_description: "<DESCRIPTION>"

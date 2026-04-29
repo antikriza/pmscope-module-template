@@ -1,0 +1,20 @@
+# Run alongside PM-SCOPE's docker-compose.yml to register this module.
+# TODO(rename): change service name `pmscope-mymodule` to your module's name.
+# Pick a Redis DB number in 28-31 (PM-SCOPE uses 0-27).
+
+services:
+  pmscope-mymodule:
+    build: ./
+    container_name: pmscope-mymodule-dev
+    networks:
+      - pmscope_pmscope-internal
+    environment:
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN}
+      - REDIS_URL=redis://redis:6379/30   # TODO: pick an unused DB if you need a job store
+    depends_on:
+      redis:
+        condition: service_healthy
+
+networks:
+  pmscope_pmscope-internal:
+    external: true

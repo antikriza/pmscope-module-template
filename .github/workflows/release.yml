@@ -1,0 +1,67 @@
+# TODO(rename): change `pmscope-mymodule` to your module's name once renamed.
+name: Build & push Docker image
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (e.g. 0.1.0)'
+        required: true
+        default: '0.1.0'
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set version
+        id: ver
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ inputs.version }}
+          GITHUB_REF_VAR: ${{ github.ref }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "version=$INPUT_VERSION" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${GITHUB_REF_VAR#refs/tags/v}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build & push
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/pmscope-mymodule:${{ steps.ver.outputs.version }}
+            ghcr.io/${{ github.repository_owner }}/pmscope-mymodule:latest
+
+      - name: Print digest for manifest pinning
+        env:
+          OWNER: ${{ github.repository_owner }}
+          DIGEST_VAL: ${{ steps.build.outputs.digest }}
+        run: |
+          echo "::notice title=Digest pin::ghcr.io/${OWNER}/pmscope-mymodule@${DIGEST_VAL}"
+          echo "ghcr.io/${OWNER}/pmscope-mymodule@${DIGEST_VAL}" > digest.txt
+
+      - name: Upload digest as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: digest-${{ steps.ver.outputs.version }}
+          path: digest.txt
