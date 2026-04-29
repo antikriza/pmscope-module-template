@@ -11,7 +11,9 @@ The handler MUST return a dict matching the canonical watchlist scan shape:
 
 Use pmscope.testing.assert_watchlist_response_shape() in your tests.
 """
-from datetime import datetime, timezone
+# TODO(implement): you'll likely want these when building your response — uncomment as needed.
+# from datetime import datetime, timezone
+# from uuid import uuid4
 
 
 async def watchlist_handler(entity_type: str, entity_value: str) -> dict:
